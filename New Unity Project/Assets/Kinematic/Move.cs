@@ -8,43 +8,60 @@ public class Move : MonoBehaviour {
 	public GameObject aim;
 	public Slider arrow;
 	public float max_mov_velocity = 5.0f;
-    public float factor = 4.0f;
+	public float max_mov_acceleration = 0.1f;
+	public float max_rot_velocity = 10.0f; // in degrees / second
+	public float max_rot_acceleration = 0.1f; // in degrees
 
-	public Vector3 mov_velocity = Vector3.zero;
+	[Header("-------- Read Only --------")]
+	public Vector3 movement = Vector3.zero;
+	public float rotation = 0.0f; // degrees
 
-	// Use this for initialization
-	public void SetMovementVelocity (Vector3 vel) {
-		mov_velocity = vel;
+	// Methods for behaviours to set / add velocities
+	public void SetMovementVelocity (Vector3 velocity) 
+	{
+		movement = velocity;
 	}
 
+	public void AccelerateMovement (Vector3 velocity) 
+	{
+		movement += velocity;
+	}
+
+	public void SetRotationVelocity (float rotation_velocity) 
+	{
+		rotation = rotation_velocity;
+	}
+
+	public void AccelerateRotation (float rotation_acceleration) 
+	{
+		rotation += rotation_acceleration;
+	}
+
+	
 	// Update is called once per frame
 	void Update () 
 	{
-        // TODO 1: Make sure mov_velocity is never bigger that max_mov_velocity
+		// cap velocity
+		if(movement.magnitude > max_mov_velocity)
+		{
+			movement.Normalize();
+			movement *= max_mov_velocity;
+		}
 
-        if(mov_velocity.magnitude > max_mov_velocity)
-        {
-            mov_velocity.Normalize();
-            mov_velocity *= max_mov_velocity;
-        }
+		// cap rotation
+		Mathf.Clamp(rotation, -max_rot_velocity, max_rot_velocity);
 
-        // TODO 2: rotate the arrow to point to mov_velocity direction. First find out the angle
-        // then create a Quaternion with that expressed that rotation and apply it to aim.transform
+		// rotate the arrow
+		float angle = Mathf.Atan2(movement.x, movement.z);
+		aim.transform.rotation = Quaternion.AngleAxis(Mathf.Rad2Deg * angle, Vector3.up);
 
-        float rotation = Mathf.Atan2(mov_velocity.x, mov_velocity.z);
-        aim.transform.rotation = Quaternion.AngleAxis(rotation * Mathf.Rad2Deg, Vector3.up);
+		// strech it
+		arrow.value = movement.magnitude * 4;
 
-        // TODO 3: stretch the arrow (arrow.value) to show how fast the tank is getting pushed in
-        // that direction. Adjust with some factor so the arrow is visible.
+		// final rotate
+		transform.rotation *= Quaternion.AngleAxis(rotation * Time.deltaTime, Vector3.up);
 
-        arrow.value = mov_velocity.magnitude * factor;
-
-        // TODO 4: update tank position based on final mov_velocity and deltatime
-
-        mov_velocity.y = 0.0f;
-        transform.position += mov_velocity * Time.deltaTime;
-
-		// Reset movement to 0 to simplify things ...
-		mov_velocity = Vector3.zero;
+		// finally move
+		transform.position += movement * Time.deltaTime;
 	}
 }

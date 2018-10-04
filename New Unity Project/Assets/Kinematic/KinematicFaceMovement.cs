@@ -3,6 +3,8 @@ using System.Collections;
 
 public class KinematicFaceMovement : MonoBehaviour {
 
+	public float min_angle = 1.0f;
+
 	Move move;
 
 	// Use this for initialization
@@ -11,8 +13,18 @@ public class KinematicFaceMovement : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
-		// TODO 7: rotate the whole tank to look in the movement direction
-		// Extremnely similar to TODO 2
+	void Update () 
+	{
+		float target_degrees = Mathf.Atan2(move.movement.x, move.movement.z) * Mathf.Rad2Deg;
+		//transform.eulerAngles = new Vector3(0.0f, target_degrees, 0.0f);
+
+
+		float current_degrees = Mathf.Atan2(transform.forward.x, transform.forward.z) * Mathf.Rad2Deg;
+		float delta = Mathf.DeltaAngle(target_degrees, current_degrees);
+
+		if(Mathf.Abs(delta) < min_angle)
+			move.SetRotationVelocity(0.0f);
+		else
+			move.SetRotationVelocity(-delta);
 	}
 }
