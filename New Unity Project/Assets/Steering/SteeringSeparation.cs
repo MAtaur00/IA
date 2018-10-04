@@ -32,6 +32,7 @@ public class SteeringSeparation : MonoBehaviour {
                 distance.Normalize();
                 distance *= move.max_mov_acceleration;
                 distance *= falloff.Evaluate(distance.magnitude);
+                distance.y = 0;
                 move.AccelerateMovement(distance);
             }
         }

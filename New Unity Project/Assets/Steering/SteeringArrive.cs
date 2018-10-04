@@ -49,6 +49,7 @@ public class SteeringArrive : MonoBehaviour {
         }
         else
         {
+            acceleration.y = 0;
             move.AccelerateMovement(acceleration);
         }
     }
